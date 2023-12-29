@@ -13,11 +13,21 @@ import { themeColors } from '../../theme';
 import SpacingContainer from '../../components/spacingContainer';
 import DishRow from '../../components/dishRow';
 import CartIcon from '../../components/cartIcon';
+import { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { setRestaurant } from '../../slices/restaurantSlice';
 
 function Restaurant() {
     const navigation = useNavigation();
     const { params } = useRoute();
     const item = params;
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        if (item && item.id) {
+            dispatch(setRestaurant({ ...item }));
+        }
+    }, []);
 
     return (
         <View>

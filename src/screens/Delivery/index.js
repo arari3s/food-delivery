@@ -5,10 +5,18 @@ import MapView, { Marker } from 'react-native-maps';
 import { themeColors } from '../../theme';
 import * as Icon from 'react-native-feather';
 import SpacingContainer from '../../components/spacingContainer';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectRestaurant } from '../../slices/restaurantSlice';
+import { emptyCart } from '../../slices/cartSlice';
 
 function Delivery() {
-    const restaurant = featured.restaurants[0];
+    const restaurant = useSelector(selectRestaurant);
     const navigation = useNavigation();
+    const dispatch = useDispatch();
+    const cancelOrder = () => {
+        navigation.navigate('Home');
+        dispatch(emptyCart());
+    };
 
     return (
         <View style={styles.container}>
@@ -71,7 +79,7 @@ function Delivery() {
                         </TouchableOpacity>
                         <TouchableOpacity
                             style={styles.btnIcon}
-                            onPress={() => navigation.navigate('Home')}
+                            onPress={cancelOrder}
                         >
                             <Icon.X strokeWidth={4} stroke={'red'} />
                         </TouchableOpacity>

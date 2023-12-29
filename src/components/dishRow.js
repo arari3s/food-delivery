@@ -2,8 +2,25 @@ import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import SpacingContainer from './spacingContainer';
 import * as Icon from 'react-native-feather';
 import { themeColors } from '../theme';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+    addToCart,
+    removeFromCart,
+    selectCartItemsById,
+} from '../slices/cartSlice';
 
 function DishRow({ item }) {
+    const dispatch = useDispatch();
+    const totalItems = useSelector((state) =>
+        selectCartItemsById(state, item.id),
+    );
+    const handleIncrease = () => {
+        dispatch(addToCart({ ...item }));
+    };
+    const handleDecrease = () => {
+        dispatch(removeFromCart({ id: item.id }));
+    };
+
     return (
         <View style={styles.container}>
             <Image source={item.image} style={styles.imageDish} />
@@ -19,7 +36,11 @@ function DishRow({ item }) {
                 <View style={styles.priceContainer}>
                     <Text style={styles.price}>${item.price}</Text>
                     <View style={styles.buttonContainer}>
-                        <TouchableOpacity style={styles.button}>
+                        <TouchableOpacity
+                            style={styles.button}
+                            onPress={handleDecrease}
+                            disabled={!totalItems.length}
+                        >
                             <Icon.Minus
                                 strokeWidth={2}
                                 height={20}
@@ -27,8 +48,11 @@ function DishRow({ item }) {
                                 stroke={'white'}
                             />
                         </TouchableOpacity>
-                        <Text style={styles.order}>{2}</Text>
-                        <TouchableOpacity style={styles.button}>
+                        <Text style={styles.order}>{totalItems.length}</Text>
+                        <TouchableOpacity
+                            style={styles.button}
+                            onPress={handleIncrease}
+                        >
                             <Icon.Plus
                                 strokeWidth={2}
                                 height={20}

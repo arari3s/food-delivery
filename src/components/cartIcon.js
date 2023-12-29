@@ -1,9 +1,16 @@
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { themeColors } from '../theme';
 import { useNavigation } from '@react-navigation/native';
+import { useSelector } from 'react-redux';
+import { themeColors } from '../theme';
+import { selectCartItems, selectCartTotal } from '../slices/cartSlice';
 
 function CartIcon() {
     const navigation = useNavigation();
+    const cartItem = useSelector(selectCartItems);
+    const cartTotal = useSelector(selectCartTotal);
+
+    if (!cartItem.length) return;
+
     return (
         <View style={styles.container}>
             <TouchableOpacity
@@ -11,10 +18,10 @@ function CartIcon() {
                 onPress={() => navigation.navigate('Cart')}
             >
                 <View style={styles.button}>
-                    <Text style={styles.textCart}>3</Text>
+                    <Text style={styles.textCart}>{cartItem.length}</Text>
                 </View>
                 <Text style={styles.textCart}>View Cart</Text>
-                <Text style={styles.textCart}>${23}</Text>
+                <Text style={styles.textCart}>${cartTotal}</Text>
             </TouchableOpacity>
         </View>
     );

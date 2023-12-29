@@ -6,15 +6,39 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { themeColors } from '../../theme';
-import * as Icon from 'react-native-feather';
-import { featured } from '../../constants';
 import { useNavigation } from '@react-navigation/native';
 import SpacingContainer from '../../components/spacingContainer';
+import { selectRestaurant } from '../../slices/restaurantSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { themeColors } from '../../theme';
+import * as Icon from 'react-native-feather';
+import {
+    removeFromCart,
+    selectCartItems,
+    selectCartTotal,
+} from '../../slices/cartSlice';
+import { useEffect, useState } from 'react';
 
 function Cart() {
-    const restaurant = featured.restaurants[0];
+    const restaurant = useSelector(selectRestaurant);
     const navigation = useNavigation();
+    const cartItems = useSelector(selectCartItems);
+    const cartTotal = useSelector(selectCartTotal);
+    const [groupedItems, setGroupedItems] = useState({});
+    const deliveryFee = 2;
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        const items = cartItems.reduce((group, item) => {
+            if (group[item.id]) {
+                group[item.id].push(item);
+            } else {
+                group[item.id] = [item];
+            }
+            return group;
+        }, {});
+        setGroupedItems(items);
+    }, [cartItems]);
 
     return (
         <View style={styles.container}>
@@ -37,7 +61,7 @@ function Cart() {
                     style={styles.imageDelivery}
                 />
                 <Text style={styles.textDelivery}>
-                    Delivery in20-30 minutes
+                    Delivery in 20-30 minutes
                 </Text>
                 <TouchableOpacity>
                     <Text style={styles.textButton}>Change</Text>
@@ -48,14 +72,17 @@ function Cart() {
                 contentContainerStyle={{ paddingBottom: 50 }}
                 style={styles.dishesContainer}
             >
-                {restaurant.dishes.map((dish, index) => {
+                {Object.entries(groupedItems).map(([key, items]) => {
+                    const dish = items[0];
                     return (
-                        <View key={index} style={styles.itemContainer}>
+                        <View key={key} style={styles.itemContainer}>
                             <SpacingContainer
                                 spacing={12}
                                 styleCustom={styles.sectionItem}
                             >
-                                <Text style={styles.countItem}>2x</Text>
+                                <Text style={styles.countItem}>
+                                    {items.length}x
+                                </Text>
                                 <Image
                                     source={dish.image}
                                     style={styles.imageItem}
@@ -69,7 +96,14 @@ function Cart() {
                                 <Text style={styles.priceItem}>
                                     ${dish.price}
                                 </Text>
-                                <TouchableOpacity style={styles.btnMinus}>
+                                <TouchableOpacity
+                                    style={styles.btnMinus}
+                                    onPress={() =>
+                                        dispatch(
+                                            removeFromCart({ id: dish.id }),
+                                        )
+                                    }
+                                >
                                     <Icon.Minus
                                         strokeWidth={2}
                                         height={20}
@@ -82,6 +116,7 @@ function Cart() {
                     );
                 })}
             </ScrollView>
+
             <SpacingContainer
                 spacing={12}
                 styleCustom={styles.totalContainer}
@@ -89,15 +124,17 @@ function Cart() {
             >
                 <View style={styles.subTotal}>
                     <Text style={styles.itemSubtotal}>Subtotal</Text>
-                    <Text style={styles.itemSubtotal}>$20</Text>
+                    <Text style={styles.itemSubtotal}>${cartTotal}</Text>
                 </View>
                 <View style={styles.subTotal}>
                     <Text style={styles.itemSubtotal}>Delivery Fee</Text>
-                    <Text style={styles.itemSubtotal}>$2</Text>
+                    <Text style={styles.itemSubtotal}>${deliveryFee}</Text>
                 </View>
                 <View style={styles.subTotal}>
                     <Text style={styles.orderTotal}>Order Total</Text>
-                    <Text style={styles.orderTotal}>$30</Text>
+                    <Text style={styles.orderTotal}>
+                        ${deliveryFee + cartTotal}
+                    </Text>
                 </View>
                 <View>
                     <TouchableOpacity
